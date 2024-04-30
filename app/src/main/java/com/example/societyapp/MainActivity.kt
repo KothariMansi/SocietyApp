@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.societyapp.ui.MainScreen
 import com.example.societyapp.ui.theme.SocietyAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -29,5 +30,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SocietyApp() {
-
+    MainScreen(
+        //onNameChange =
+    )
 }
+
+
