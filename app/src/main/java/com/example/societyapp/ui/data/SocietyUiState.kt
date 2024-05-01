@@ -6,8 +6,10 @@ data class SocietyUiState(
     val name: String = "",
     val mobileNo: String = "" ,
     val from: String = "",
-    //val date: Date = 12-02-2024,
+    val date: String = "",
     val visitorChoose: Boolean = false,
     val workerChoose: Boolean = false,
+    val expanded: Boolean = false,
+    val selected: String = "Select Flat"
 
 )

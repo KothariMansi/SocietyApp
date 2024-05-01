@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SocietyViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(SocietyUiState())
@@ -22,7 +25,7 @@ class SocietyViewModel: ViewModel() {
     fun updateFrom(from: String) {
         _uiState.update {
             it.copy(
-                name = from
+                from = from
             )
         }
     }
@@ -31,6 +34,15 @@ class SocietyViewModel: ViewModel() {
         _uiState.update {
             it.copy(
                 mobileNo = currentNum
+            )
+        }
+    }
+
+    fun getCurrentDate() {
+        val sdf = SimpleDateFormat("dd:MM:yyyy", Locale.getDefault())
+        _uiState.update {
+            it.copy(
+                date = sdf.format(Date())
             )
         }
     }
@@ -51,6 +63,29 @@ class SocietyViewModel: ViewModel() {
                 visitorChoose = false,
                 workerChoose = !worker
 
+            )
+        }
+    }
+
+    fun expandDropdown() {
+        _uiState.update {
+            it.copy(
+                expanded = true
+            )
+        }
+    }
+    fun onDismissRequest() {
+        _uiState.update {
+            it.copy(
+                expanded = false
+            )
+        }
+    }
+
+    fun updateSelectedFlat(selected: String) {
+        _uiState.update {
+            it.copy(
+                selected = selected
             )
         }
     }
