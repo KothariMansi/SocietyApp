@@ -90,5 +90,13 @@ class SocietyViewModel: ViewModel() {
         }
     }
 
+    fun updateIsFlatSelected() {
+        _uiState.update{
+            it.copy(
+                isFlatSelected = true
+            )
+        }
+    }
+
 
 }

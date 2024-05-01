@@ -12,10 +12,14 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -53,7 +57,8 @@ fun MainScreen(
     ) {
         Text(text = "Society App",
             style = MaterialTheme.typography.displayMedium,
-            modifier = modifier.align(Alignment.CenterHorizontally)
+            modifier = modifier
+                .align(Alignment.CenterHorizontally)
                 .padding(bottom = 12.dp)
         )
 
@@ -160,35 +165,45 @@ fun MainScreen(
         Column(
             modifier = modifier.verticalScroll(scrollState),
         ) {
-            ExposedDropdownMenuBox(
-                expanded = societyUiState.expanded,
-                onExpandedChange = { societyViewModel.expandDropdown()},
-
-            ) {
-
-                TextField(
-                    value = societyUiState.selected,
-                    onValueChange = {societyViewModel.updateSelectedFlat(it)},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = societyUiState.expanded) },
-                    modifier = Modifier.menuAnchor()
-                )
-
-                ExposedDropdownMenu(
+            Row {
+                ExposedDropdownMenuBox(
                     expanded = societyUiState.expanded,
-                    onDismissRequest = { societyViewModel.onDismissRequest()},
-                    modifier = modifier
-                        .padding(4.dp)
-                        //.align(Alignment.BottomEnd)
-
+                    onExpandedChange = { societyViewModel.expandDropdown()},
 
                 ) {
-                    flatData.forEach {
-                        DropdownMenuItem(
-                            text = { Text(text = it) },
-                            onClick = { societyViewModel.updateSelectedFlat(it)
-                            }
-                        )
+
+                    TextField(
+                        value = societyUiState.selected,
+                        onValueChange = {societyViewModel.updateSelectedFlat(it)},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = societyUiState.expanded) },
+                        modifier = Modifier.menuAnchor()
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = societyUiState.expanded,
+                        onDismissRequest = { societyViewModel.onDismissRequest()},
+                        modifier = modifier
+                            .padding(4.dp)
+                            //.align(Alignment.BottomEnd)
+
+
+                    ) {
+                        flatData.forEach {
+                            DropdownMenuItem(
+                                text = { Text(text = it) },
+                                onClick = { societyViewModel.updateSelectedFlat(it)
+                                    societyViewModel.updateIsFlatSelected()
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (societyUiState.isFlatSelected) {
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "123454534")
+                        Icon(imageVector = Icons.Filled.Call, contentDescription = "")
                     }
                 }
             }
