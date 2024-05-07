@@ -43,8 +43,8 @@ import com.example.societyapp.ui.theme.SocietyAppTheme
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    societyViewModel: SocietyViewModel = viewModel(),
-
+    societyViewModel: SocietyViewModel,
+    add: () -> Unit,
 
 ) {
     val societyUiState by societyViewModel.uiState.collectAsState()
@@ -61,6 +61,11 @@ fun MainScreen(
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 12.dp)
         )
+
+        Button(onClick = { add() }) {
+            Text(text = "Add")
+            
+        }
 
         Row(
             modifier = modifier
@@ -218,7 +223,10 @@ fun MainScreen(
 @Composable
 fun MainScreenPreview() {
     SocietyAppTheme {
-        MainScreen()
+        MainScreen(
+            societyViewModel = viewModel(),
+            add = {}
+        )
     }
 }
 

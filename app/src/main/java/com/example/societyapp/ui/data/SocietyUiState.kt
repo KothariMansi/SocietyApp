@@ -11,4 +11,4 @@ data class SocietyUiState(
     val selected: String = "Select Flat",
     val isFlatSelected: Boolean = false,
 
-    )
+)
