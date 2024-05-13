@@ -1,18 +1,32 @@
 package com.example.societyapp.ui.models
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.societyapp.ui.data.MastersDao
 import com.example.societyapp.ui.data.SocietyUiState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class SocietyViewModel: ViewModel() {
+class SocietyViewModel(
+    private val mastersDao: MastersDao
+): ViewModel() {
     private val _uiState = MutableStateFlow(SocietyUiState())
     val uiState: StateFlow<SocietyUiState> = _uiState.asStateFlow()
+
+    val fetchedUiState: StateFlow<SocietyUiState>  = mastersDao.getMasters().map { SocietyUiState(mastersList = it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = SocietyUiState()
+        )
 
     fun updateName(currentName: String) {
         _uiState.update {
@@ -82,10 +96,11 @@ class SocietyViewModel: ViewModel() {
         }
     }
 
-    fun updateSelectedFlat(selected: String) {
+    fun updateSelectedFlat(selected: String, mobileNo: String) {
         _uiState.update {
             it.copy(
-                selected = selected
+                selected = selected,
+                mobileNo = mobileNo
             )
         }
     }
@@ -98,5 +113,8 @@ class SocietyViewModel: ViewModel() {
         }
     }
 
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
+    }
 
 }

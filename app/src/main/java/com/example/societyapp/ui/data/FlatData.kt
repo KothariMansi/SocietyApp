@@ -1,14 +1,10 @@
 package com.example.societyapp.ui.data
 
-val flatData: MutableList<String> = mutableListOf(
-    "Pankaj",
-    "Piyush",
-    "Arvind",
-    "Naresh",
-    "Ramesh",
-    "Suresh",
-    "ShyamLal",
-    "Mahaveer",
-    "Samira",
-    "Nayra",
+import androidx.room.ColumnInfo
+
+data class FlatData(
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "mobileNoOne") val mobileNoOne: String,
+    @ColumnInfo(name = "mobileNoTwo") val mobileNoTwo: String
+
 )

@@ -35,7 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.societyapp.R
-import com.example.societyapp.ui.data.flatData
 import com.example.societyapp.ui.models.SocietyViewModel
 import com.example.societyapp.ui.theme.SocietyAppTheme
 
@@ -48,7 +47,7 @@ fun MainScreen(
 
 ) {
     val societyUiState by societyViewModel.uiState.collectAsState()
-
+    val fetchedUiState by societyViewModel.fetchedUiState.collectAsState()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -179,11 +178,12 @@ fun MainScreen(
 
                     TextField(
                         value = societyUiState.selected,
-                        onValueChange = {societyViewModel.updateSelectedFlat(it)},
+                        onValueChange = {societyViewModel.updateSelectedFlat(it, societyUiState.mobileNo)},
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = societyUiState.expanded) },
                         modifier = Modifier.menuAnchor()
                     )
+                   // val uiState by societyViewModel.uiState
 
                     ExposedDropdownMenu(
                         expanded = societyUiState.expanded,
@@ -192,12 +192,11 @@ fun MainScreen(
                             .padding(4.dp)
                             //.align(Alignment.BottomEnd)
 
-
                     ) {
-                        flatData.forEach {
+                        fetchedUiState.mastersList.forEach {
                             DropdownMenuItem(
-                                text = { Text(text = it) },
-                                onClick = { societyViewModel.updateSelectedFlat(it)
+                                text = { Text(text = it.name) },
+                                onClick = { societyViewModel.updateSelectedFlat(it.name, it.mobileNoOne)
                                     societyViewModel.updateIsFlatSelected()
                                 }
                             )
@@ -207,7 +206,7 @@ fun MainScreen(
 
                 if (societyUiState.isFlatSelected) {
                     Button(onClick = { /*TODO*/ }) {
-                        Text(text = "123454534")
+                        Text(text = societyUiState.mobileNo)
                         Icon(imageVector = Icons.Filled.Call, contentDescription = "")
                     }
                 }

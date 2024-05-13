@@ -10,5 +10,6 @@ data class SocietyUiState(
     val expanded: Boolean = false,
     val selected: String = "Select Flat",
     val isFlatSelected: Boolean = false,
+    val mastersList: List<FlatData> = listOf()
 
 )

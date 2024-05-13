@@ -32,11 +32,20 @@ class MainActivity : ComponentActivity() {
     ).build()
 
     }
-    private val viewModel by viewModels<MastersViewModel> (
+    private val mastersViewModel by viewModels<MastersViewModel> (
         factoryProducer = {
             object : ViewModelProvider.Factory {
                 override fun <T: ViewModel> create(modelClass: Class<T>): T {
                     return MastersViewModel(database.dao) as T
+                }
+            }
+        }
+    )
+    private val societyViewModel by viewModels<SocietyViewModel> (
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                override fun <T: ViewModel> create(modelClass: Class<T>): T {
+                    return SocietyViewModel(database.dao) as T
                 }
             }
         }
@@ -52,7 +61,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                    SocietyApp(
-                       mastersViewModel = viewModel
+                       mastersViewModel = mastersViewModel,
+                       societyViewModel = societyViewModel
                    )
                 }
             }

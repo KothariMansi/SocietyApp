@@ -68,8 +68,8 @@ class MastersViewModel(
                 Log.d("Exception", e.toString())
             }
         }
-
-
     }
+
+
 
 }
