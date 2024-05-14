@@ -10,6 +10,6 @@ data class Masters(
 
     val flatNumber: Int,
     val name: String,
-    val mobileNoOne: Int,
-    val mobileNoTwo: Int
+    val mobileNoOne: Long,
+    val mobileNoTwo: Long
 )

@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.societyapp.R
 import com.example.societyapp.ui.models.MastersViewModel
@@ -50,11 +51,10 @@ fun MastersScreen(
         }
     ) {
 
-
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.Start,
-        modifier = modifier.padding(it),
+        modifier = modifier.padding(it).padding(8.dp),
     ) {
         Row(
             modifier = modifier
@@ -104,7 +104,7 @@ fun MastersScreen(
                 modifier = modifier
                     .wrapContentHeight()
                     .weight(3f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Number)
             )
         }
 
@@ -120,7 +120,7 @@ fun MastersScreen(
                 modifier = modifier
                     .wrapContentHeight()
                     .weight(3f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Number),
                 keyboardActions = KeyboardActions(
                     onDone = {
                         mastersViewModel.save(
@@ -129,6 +129,7 @@ fun MastersScreen(
                             mobileNoOne = mastersUiState.mobileNoOne,
                             mobileNoTwo = mastersUiState.mobileNoTwo
                         )
+                        mastersViewModel.clear()
                     }
                 )
             )
@@ -142,6 +143,7 @@ fun MastersScreen(
                     mobileNoOne = mastersUiState.mobileNoOne,
                     mobileNoTwo = mastersUiState.mobileNoTwo
                 )
+                mastersViewModel.clear()
             }
         ) {
             Text(text = "Save")

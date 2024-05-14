@@ -1,5 +1,8 @@
 package com.example.societyapp.ui.models
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.societyapp.ui.data.MastersDao
@@ -15,8 +18,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+
 class SocietyViewModel(
-    private val mastersDao: MastersDao
+    private val mastersDao: MastersDao,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(SocietyUiState())
     val uiState: StateFlow<SocietyUiState> = _uiState.asStateFlow()
@@ -96,11 +100,12 @@ class SocietyViewModel(
         }
     }
 
-    fun updateSelectedFlat(selected: String, mobileNo: String) {
+    fun updateSelectedFlat(selected: String, mobileNoOne: String ,mobileNoTwo: String) {
         _uiState.update {
             it.copy(
                 selected = selected,
-                mobileNo = mobileNo
+                mobileNoButtonOne = mobileNoOne,
+                mobileNoButtonTwo = mobileNoTwo
             )
         }
     }
@@ -113,8 +118,30 @@ class SocietyViewModel(
         }
     }
 
+    fun permissionGranted() {
+        _uiState.update {
+            it.copy(
+                permissionGranted = true
+            )
+        }
+    }
+    fun makeCallIfPermissionGranted(activity: ComponentActivity, phoneNumber: String) {
+        makeCall(activity, phoneNumber)
+    }
+
+
+    private fun makeCall(activity: ComponentActivity, phoneNumber: String) {
+        val intent = Intent(
+            Intent.ACTION_CALL,
+            Uri.parse("tel:$phoneNumber")
+        ) // Initiates the Intent
+
+        activity.startActivity(intent)
+
+    }
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
+        private const val CALL_PERMISSION_REQUEST_CODE = 123
     }
 
 }

@@ -1,10 +1,12 @@
 package com.example.societyapp.ui
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -31,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,16 +41,19 @@ import com.example.societyapp.R
 import com.example.societyapp.ui.models.SocietyViewModel
 import com.example.societyapp.ui.theme.SocietyAppTheme
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
     societyViewModel: SocietyViewModel,
     add: () -> Unit,
+    activity: ComponentActivity,
 
 ) {
     val societyUiState by societyViewModel.uiState.collectAsState()
     val fetchedUiState by societyViewModel.fetchedUiState.collectAsState()
+
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -96,7 +102,7 @@ fun MainScreen(
             TextField(value = societyUiState.mobileNo,
                 onValueChange = {societyViewModel.updateMobileNo(it)},
                 Modifier.weight(3f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Number),
             )
         }
         Row {
@@ -172,31 +178,42 @@ fun MainScreen(
             Row {
                 ExposedDropdownMenuBox(
                     expanded = societyUiState.expanded,
-                    onExpandedChange = { societyViewModel.expandDropdown()},
+                    onExpandedChange = { societyViewModel.expandDropdown() },
 
-                ) {
+                    ) {
 
                     TextField(
                         value = societyUiState.selected,
-                        onValueChange = {societyViewModel.updateSelectedFlat(it, societyUiState.mobileNo)},
+                        onValueChange = {
+                            societyViewModel.updateSelectedFlat(
+                                it,
+                                societyUiState.mobileNoButtonOne,
+                                societyUiState.mobileNoButtonTwo
+                            )
+                        },
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = societyUiState.expanded) },
                         modifier = Modifier.menuAnchor()
                     )
-                   // val uiState by societyViewModel.uiState
+                    // val uiState by societyViewModel.uiState
 
                     ExposedDropdownMenu(
                         expanded = societyUiState.expanded,
-                        onDismissRequest = { societyViewModel.onDismissRequest()},
+                        onDismissRequest = { societyViewModel.onDismissRequest() },
                         modifier = modifier
-                            .padding(4.dp)
-                            //.align(Alignment.BottomEnd)
+                            .padding(4.dp).heightIn(2.dp, 400.dp)
+                        //.align(Alignment.BottomEnd)
 
                     ) {
                         fetchedUiState.mastersList.forEach {
                             DropdownMenuItem(
                                 text = { Text(text = it.name) },
-                                onClick = { societyViewModel.updateSelectedFlat(it.name, it.mobileNoOne)
+                                onClick = {
+                                    societyViewModel.updateSelectedFlat(
+                                        it.name,
+                                        it.mobileNoOne,
+                                        it.mobileNoTwo
+                                    )
                                     societyViewModel.updateIsFlatSelected()
                                 }
                             )
@@ -205,17 +222,37 @@ fun MainScreen(
                 }
 
                 if (societyUiState.isFlatSelected) {
-                    Button(onClick = { /*TODO*/ }) {
-                        Text(text = societyUiState.mobileNo)
-                        Icon(imageVector = Icons.Filled.Call, contentDescription = "")
+                    Column {
+                        Button(onClick = {
+                            if (societyUiState.permissionGranted) {
+                                societyViewModel.makeCallIfPermissionGranted(
+                                    activity = activity,
+                                    phoneNumber = societyUiState.mobileNoButtonOne
+                                )
+                            }
+
+                        }) {
+                            Text(text = societyUiState.mobileNoButtonOne,style = MaterialTheme.typography.labelSmall)
+                            Icon(imageVector = Icons.Filled.Call, contentDescription = "")
+                        }
+
+                        Button(onClick = {
+                            if (societyUiState.permissionGranted) {
+                                societyViewModel.makeCallIfPermissionGranted(
+                                    activity = activity,
+                                    phoneNumber = societyUiState.mobileNoButtonTwo
+                                )
+                            }
+
+                        }) {
+                            Text(text = societyUiState.mobileNoButtonTwo, style = MaterialTheme.typography.labelSmall)
+                            Icon(imageVector = Icons.Filled.Call, contentDescription = "")
+                        }
                     }
                 }
             }
-
         }
-
     }
-
 }
 
 @Preview
@@ -224,7 +261,8 @@ fun MainScreenPreview() {
     SocietyAppTheme {
         MainScreen(
             societyViewModel = viewModel(),
-            add = {}
+            add = {},
+            activity = ComponentActivity()
         )
     }
 }

@@ -25,6 +25,18 @@ class MastersViewModel(
             )
         }
     }
+
+    fun clear() {
+        _uiState.update {
+            it.copy(
+                flatNo = "",
+                name = "",
+                mobileNoOne = "",
+                mobileNoTwo = ""
+            )
+        }
+    }
+
     fun updateName(currentName: String) {
         _uiState.update {
             it.copy(
@@ -58,8 +70,8 @@ class MastersViewModel(
             val masters = Masters(
                 flatNumber = flatNumber.toInt(),
                 name = name,
-                mobileNoOne = mobileNoOne.toInt(),
-                mobileNoTwo = mobileNoTwo.toInt()
+                mobileNoOne = mobileNoOne.toLong(),
+                mobileNoTwo = mobileNoTwo.toLong()
             )
             try {
                 mastersDao.insertMasters(masters = masters)
