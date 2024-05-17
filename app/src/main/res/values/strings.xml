@@ -5,4 +5,8 @@
     <string name="from">From</string>
     <string name="date">Date</string>
     <string name="flat_no">Flat No.</string>
+    <string name="add">Add</string>
+    <string name="save">Save</string>
+    <string name="societyApp">Society App</string>
+    <string name="masters">Masters</string>
 </resources>

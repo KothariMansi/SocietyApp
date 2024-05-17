@@ -2,9 +2,16 @@ package com.example.societyapp.ui.models
 
 import android.content.Intent
 import android.net.Uri
+import android.speech.RecognizerIntent
 import androidx.activity.ComponentActivity
+import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.societyapp.SocietyApplication
 import com.example.societyapp.ui.data.MastersDao
 import com.example.societyapp.ui.data.SocietyUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +27,7 @@ import java.util.Locale
 
 
 class SocietyViewModel(
-    private val mastersDao: MastersDao,
+    mastersDao: MastersDao,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(SocietyUiState())
     val uiState: StateFlow<SocietyUiState> = _uiState.asStateFlow()
@@ -33,11 +40,19 @@ class SocietyViewModel(
         )
 
     fun updateName(currentName: String) {
+
         _uiState.update {
             it.copy(
                 name = currentName
             )
         }
+    }
+
+    fun getSpeechInput(activity: ComponentActivity) {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak Something")
+        startActivityForResult(activity, intent, 101, null)
     }
 
     fun updateFrom(from: String) {
@@ -100,31 +115,14 @@ class SocietyViewModel(
         }
     }
 
-    fun updateSelectedFlat(selected: String, mobileNoOne: String ,mobileNoTwo: String) {
+    fun updateSelectedFlat(selected: String) {
         _uiState.update {
             it.copy(
                 selected = selected,
-                mobileNoButtonOne = mobileNoOne,
-                mobileNoButtonTwo = mobileNoTwo
             )
         }
     }
 
-    fun updateIsFlatSelected() {
-        _uiState.update{
-            it.copy(
-                isFlatSelected = true
-            )
-        }
-    }
-
-    fun permissionGranted() {
-        _uiState.update {
-            it.copy(
-                permissionGranted = true
-            )
-        }
-    }
     fun makeCallIfPermissionGranted(activity: ComponentActivity, phoneNumber: String) {
         makeCall(activity, phoneNumber)
     }
@@ -141,7 +139,15 @@ class SocietyViewModel(
     }
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
-        private const val CALL_PERMISSION_REQUEST_CODE = 123
+        //private const val CALL_PERMISSION_REQUEST_CODE = 123
+
+        val factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as SocietyApplication)
+                SocietyViewModel(application.database.dao())
+            }
+        }
+
     }
 
 }

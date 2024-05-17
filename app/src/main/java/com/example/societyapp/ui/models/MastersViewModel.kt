@@ -2,7 +2,12 @@ package com.example.societyapp.ui.models
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.societyapp.SocietyApplication
 import com.example.societyapp.ui.data.Masters
 import com.example.societyapp.ui.data.MastersDao
 import com.example.societyapp.ui.data.MastersUiState
@@ -82,6 +87,15 @@ class MastersViewModel(
         }
     }
 
-
+    companion object{
+        val factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as SocietyApplication)
+                MastersViewModel(
+                    application.database.dao()
+                )
+            }
+        }
+    }
 
 }

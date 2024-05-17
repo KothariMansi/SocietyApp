@@ -15,15 +15,22 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -41,6 +48,30 @@ import com.example.societyapp.R
 import com.example.societyapp.ui.models.SocietyViewModel
 import com.example.societyapp.ui.theme.SocietyAppTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBar(
+    canNavigateBack: Boolean,
+    onBackPress:() -> Unit,
+    title: String
+) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium
+            )
+        },
+        navigationIcon = {
+            if(canNavigateBack) {
+                IconButton(onClick = onBackPress) {
+                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
+                }
+            }
+        }
+    )
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,211 +80,214 @@ fun MainScreen(
     societyViewModel: SocietyViewModel,
     add: () -> Unit,
     activity: ComponentActivity,
-
 ) {
     val societyUiState by societyViewModel.uiState.collectAsState()
     val fetchedUiState by societyViewModel.fetchedUiState.collectAsState()
 
+    Scaffold(
+        topBar = {
+            TopBar(
+                canNavigateBack = false,
+                onBackPress = {},
+                title = stringResource(id = R.string.societyApp)
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { add() }) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+            }
+        }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.Start,
-        modifier = modifier.padding(8.dp)
+
     ) {
-        Text(text = "Society App",
-            style = MaterialTheme.typography.displayMedium,
-            modifier = modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 12.dp)
-        )
-
-        Button(onClick = { add() }) {
-            Text(text = "Add")
-            
-        }
-
-        Row(
-            modifier = modifier
-        ) {
-            Text(
-                text = stringResource(R.string.name),
-                modifier = modifier
-                    .padding(top = 16.dp)
-                    .weight(1f)
-            )
-            Spacer(modifier = modifier.padding(16.dp))
-            TextField(value = societyUiState.name,
-                onValueChange = { societyViewModel.updateName(it) },
-                modifier = modifier
-                    .wrapContentHeight()
-                    .weight(3f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            )
-            /* Todo Icon Mic */
-        }
-        Row {
-            Text(
-                text = stringResource(R.string.mobile_no),
-                modifier = modifier
-                    .padding(top = 16.dp)
-                    .weight(1f)
-            )
-            Spacer(modifier = modifier.padding(16.dp))
-            TextField(value = societyUiState.mobileNo,
-                onValueChange = {societyViewModel.updateMobileNo(it)},
-                Modifier.weight(3f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Number),
-            )
-        }
-        Row {
-            Text(
-                text = stringResource(R.string.from),
-                modifier = modifier
-                    .padding(top = 16.dp)
-                    .weight(1f)
-            )
-            Spacer(modifier = modifier.padding(16.dp))
-            TextField(value = societyUiState.from,
-                onValueChange = {societyViewModel.updateFrom(it)},
-                modifier = modifier.weight(3f),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions(onNext = {societyViewModel.getCurrentDate()})
-            )
-        }
-        Row {
-            Text(
-                text = stringResource(R.string.date),
-                modifier = modifier
-                    .padding(top = 16.dp)
-                    .weight(1f)
-            )
-            Spacer(modifier = modifier.padding(16.dp))
-            TextField(value = societyUiState.date,
-                onValueChange = {societyViewModel.getCurrentDate()},
-                modifier = modifier.weight(3f)
-
-            )
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.End,
-            modifier = modifier.fillMaxWidth()
-        ){
-            //Spacer(modifier = Modifier.padding(16.dp))
-
-            Row(
-                modifier = modifier.selectable(
-                    selected = societyUiState.visitorChoose,
-                    onClick = { societyViewModel.visitorUpdate(visitor = societyUiState.visitorChoose) }
-                )
-            ) {
-                RadioButton(selected = societyUiState.visitorChoose,
-                    onClick = { societyViewModel.visitorUpdate(visitor = societyUiState.visitorChoose) }
-                )
-                Text(text = "Visitor", modifier = modifier
-                    .padding(top = 12.dp)
-                    )
-            }
-
-            Spacer(modifier = Modifier.padding(start = 32.dp))
-
-            Row(
-                modifier = modifier.selectable(
-                    selected = societyUiState.workerChoose,
-                    onClick = { societyViewModel.workerUpdate(worker = societyUiState.workerChoose) }
-                )
-            ) {
-                RadioButton(selected = societyUiState.workerChoose,
-                    onClick = { societyViewModel.workerUpdate(worker = societyUiState.workerChoose) })
-                Text(text = "Worker", modifier = modifier
-                    .padding(top = 12.dp, end = 4.dp)
-                )
-
-            }
-        }
-        val scrollState = rememberScrollState()
         Column(
-            modifier = modifier.verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start,
+            modifier = modifier
+                .padding(8.dp)
+                .padding(it)
         ) {
+
+            Row(
+                modifier = modifier
+            ) {
+                Text(
+                    text = stringResource(R.string.name),
+                    modifier = modifier
+                        .padding(top = 16.dp)
+                        .weight(1f)
+                )
+                Spacer(modifier = modifier.padding(16.dp))
+                TextField(value = societyUiState.name,
+                    onValueChange = { societyViewModel.updateName(it) },
+                    modifier = modifier
+                        .wrapContentHeight()
+                        .weight(3f),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    trailingIcon = {
+                        IconButton(onClick = { societyViewModel.getSpeechInput(activity = activity) }) {
+                            Icon(imageVector = Icons.Filled.Face, contentDescription = "")
+                        }
+                    }
+                )
+                /* Todo Icon Mic */
+            }
             Row {
+                Text(
+                    text = stringResource(R.string.mobile_no),
+                    modifier = modifier
+                        .padding(top = 16.dp)
+                        .weight(1f)
+                )
+                Spacer(modifier = modifier.padding(16.dp))
+                TextField(value = societyUiState.mobileNo,
+                    onValueChange = {societyViewModel.updateMobileNo(it)},
+                    Modifier.weight(3f),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Number),
+                )
+            }
+            Row {
+                Text(
+                    text = stringResource(R.string.from),
+                    modifier = modifier
+                        .padding(top = 16.dp)
+                        .weight(1f)
+                )
+                Spacer(modifier = modifier.padding(16.dp))
+                TextField(value = societyUiState.from,
+                    onValueChange = {societyViewModel.updateFrom(it)},
+                    modifier = modifier.weight(3f),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(onNext = {societyViewModel.getCurrentDate()})
+                )
+            }
+            Row {
+                Text(
+                    text = stringResource(R.string.date),
+                    modifier = modifier
+                        .padding(top = 16.dp)
+                        .weight(1f)
+                )
+                Spacer(modifier = modifier.padding(16.dp))
+                TextField(value = societyUiState.date,
+                    onValueChange = {societyViewModel.getCurrentDate()},
+                    modifier = modifier.weight(3f)
+
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = modifier.fillMaxWidth()
+            ){
+
+                Row(
+                    modifier = modifier.selectable(
+                        selected = societyUiState.visitorChoose,
+                        onClick = { societyViewModel.visitorUpdate(visitor = societyUiState.visitorChoose) }
+                    )
+                ) {
+                    RadioButton(selected = societyUiState.visitorChoose,
+                        onClick = { societyViewModel.visitorUpdate(visitor = societyUiState.visitorChoose) }
+                    )
+                    Text(text = "Visitor", modifier = modifier.padding(top = 12.dp))
+                }
+                Spacer(modifier = Modifier.padding(start = 32.dp))
+                Row(
+                    modifier = modifier.selectable(
+                        selected = societyUiState.workerChoose,
+                        onClick = { societyViewModel.workerUpdate(worker = societyUiState.workerChoose) }
+                    )
+                ) {
+                    RadioButton(selected = societyUiState.workerChoose,
+                        onClick = { societyViewModel.workerUpdate(worker = societyUiState.workerChoose) })
+                    Text(text = "Worker", modifier = modifier
+                        .padding(top = 12.dp, end = 4.dp)
+                    )
+                }
+            }
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = modifier
+                    .verticalScroll(scrollState)
+                    .fillMaxWidth(),
+            ) {
                 ExposedDropdownMenuBox(
                     expanded = societyUiState.expanded,
                     onExpandedChange = { societyViewModel.expandDropdown() },
-
+                    modifier = modifier.fillMaxWidth()
                     ) {
-
                     TextField(
                         value = societyUiState.selected,
                         onValueChange = {
-                            societyViewModel.updateSelectedFlat(
-                                it,
-                                societyUiState.mobileNoButtonOne,
-                                societyUiState.mobileNoButtonTwo
-                            )
+                            societyViewModel.updateSelectedFlat(it)
                         },
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = societyUiState.expanded) },
-                        modifier = Modifier.menuAnchor()
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
                     )
-                    // val uiState by societyViewModel.uiState
-
                     ExposedDropdownMenu(
                         expanded = societyUiState.expanded,
                         onDismissRequest = { societyViewModel.onDismissRequest() },
                         modifier = modifier
-                            .padding(4.dp).heightIn(2.dp, 400.dp)
-                        //.align(Alignment.BottomEnd)
-
+                            .exposedDropdownSize(matchTextFieldWidth = false)
+                            .padding(4.dp)
+                            .heightIn(2.dp, 150.dp)
+                            .fillMaxWidth()
                     ) {
                         fetchedUiState.mastersList.forEach {
                             DropdownMenuItem(
-                                text = { Text(text = it.name) },
-                                onClick = {
-                                    societyViewModel.updateSelectedFlat(
-                                        it.name,
-                                        it.mobileNoOne,
-                                        it.mobileNoTwo
-                                    )
-                                    societyViewModel.updateIsFlatSelected()
+                                modifier = modifier.fillMaxWidth(),
+                                leadingIcon = { Text(text = it.flatNumber.toString()) },
+                                text = { Text(text = it.name, modifier = modifier) },
+                                onClick = {},
+                                trailingIcon = {
+                                    Row {
+                                        IconButton(
+                                            onClick = {
+                                                societyViewModel.makeCallIfPermissionGranted(
+                                                    activity = activity,
+                                                    phoneNumber = it.mobileNoOne.toString()
+                                                )
+                                            }, modifier = modifier
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Call,
+                                                contentDescription = "",
+                                            )
+                                        }
+                                        IconButton(onClick = {
+                                            societyViewModel.makeCallIfPermissionGranted(
+                                                activity = activity,
+                                                phoneNumber = it.mobileNoTwo.toString()
+                                            )
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Call,
+                                                contentDescription = ""
+                                            )
+                                        }
+                                    }
+
                                 }
                             )
                         }
                     }
                 }
-
-                if (societyUiState.isFlatSelected) {
-                    Column {
-                        Button(onClick = {
-                            if (societyUiState.permissionGranted) {
-                                societyViewModel.makeCallIfPermissionGranted(
-                                    activity = activity,
-                                    phoneNumber = societyUiState.mobileNoButtonOne
-                                )
-                            }
-
-                        }) {
-                            Text(text = societyUiState.mobileNoButtonOne,style = MaterialTheme.typography.labelSmall)
-                            Icon(imageVector = Icons.Filled.Call, contentDescription = "")
-                        }
-
-                        Button(onClick = {
-                            if (societyUiState.permissionGranted) {
-                                societyViewModel.makeCallIfPermissionGranted(
-                                    activity = activity,
-                                    phoneNumber = societyUiState.mobileNoButtonTwo
-                                )
-                            }
-
-                        }) {
-                            Text(text = societyUiState.mobileNoButtonTwo, style = MaterialTheme.typography.labelSmall)
-                            Icon(imageVector = Icons.Filled.Call, contentDescription = "")
-                        }
-                    }
-                }
             }
+
+            Spacer(modifier = modifier.padding(80.dp))
+            Button(onClick = { /*TODO*/ },  modifier = modifier.fillMaxWidth()) {
+                Text(text = stringResource(id = R.string.save))
+            }
+
         }
     }
 }
+
+
 
 @Preview
 @Composable
@@ -262,7 +296,7 @@ fun MainScreenPreview() {
         MainScreen(
             societyViewModel = viewModel(),
             add = {},
-            activity = ComponentActivity()
+            activity = ComponentActivity(),
         )
     }
 }

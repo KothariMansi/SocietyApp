@@ -10,8 +10,7 @@ data class SocietyUiState(
     val expanded: Boolean = false,
     val selected: String = "Select Flat",
     val isFlatSelected: Boolean = false,
-    val mastersList: List<FlatData> = listOf(),
-    val permissionGranted: Boolean = false,
+    val mastersList: List<Masters> = listOf(),
     val mobileNoButtonOne: String = "",
     val mobileNoButtonTwo: String = ""
 

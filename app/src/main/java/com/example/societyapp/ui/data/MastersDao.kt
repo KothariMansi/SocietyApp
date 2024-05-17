@@ -10,6 +10,6 @@ interface MastersDao {
     @Insert
     suspend fun insertMasters(masters: Masters)
 
-    @Query("SELECT name, mobileNoOne, mobileNoTwo FROM Masters")
-    fun getMasters(): Flow<List<FlatData>>
+    @Query("SELECT id, flatNumber, name, mobileNoOne, mobileNoTwo FROM Masters Order By flatNumber")
+    fun getMasters(): Flow<List<Masters>>
 }
