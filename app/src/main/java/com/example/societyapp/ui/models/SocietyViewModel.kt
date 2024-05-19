@@ -3,6 +3,7 @@ package com.example.societyapp.ui.models
 import android.content.Intent
 import android.net.Uri
 import android.speech.RecognizerIntent
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.lifecycle.ViewModel
@@ -12,35 +13,68 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.societyapp.SocietyApplication
-import com.example.societyapp.ui.data.MastersDao
+import com.example.societyapp.ui.data.SocietyDao
 import com.example.societyapp.ui.data.SocietyUiState
+import com.example.societyapp.ui.data.Visitor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 
 class SocietyViewModel(
-    mastersDao: MastersDao,
+    private val societyDao: SocietyDao,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(SocietyUiState())
     val uiState: StateFlow<SocietyUiState> = _uiState.asStateFlow()
 
-    val fetchedUiState: StateFlow<SocietyUiState>  = mastersDao.getMasters().map { SocietyUiState(mastersList = it) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-            initialValue = SocietyUiState()
-        )
+    fun save(visitor: Visitor) {
+        viewModelScope.launch {
+            try {
+                societyDao.insertVisitors(visitor = visitor)
+            }
+            catch (e:Exception){
+                Log.d("Exception", e.toString())
+            }
+        }
+    }
+
+    fun clear() {
+        _uiState.update {
+            it.copy(
+                name = "",
+                mobileNo = "",
+                from = "",
+                date = "",
+                selected = "Select Flat",
+                visitorChoose = false,
+                workerChoose = false
+            )
+        }
+    }
+
+    fun getMastersData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            societyDao.getMasters().map {
+                SocietyUiState(mastersList = it)
+            }
+            .collect { state ->
+                _uiState.update {
+                    it.copy(
+                        mastersList = state.mastersList
+                    )
+                }
+            }
+        }
+    }
 
     fun updateName(currentName: String) {
-
         _uiState.update {
             it.copy(
                 name = currentName
@@ -115,10 +149,11 @@ class SocietyViewModel(
         }
     }
 
-    fun updateSelectedFlat(selected: String) {
+    fun updateSelectedFlat(selected: String, id: Int?) {
         _uiState.update {
             it.copy(
                 selected = selected,
+                selectedId = id
             )
         }
     }

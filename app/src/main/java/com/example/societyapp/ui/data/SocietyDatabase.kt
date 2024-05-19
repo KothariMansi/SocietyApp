@@ -6,11 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [Masters::class],
-    version = 1
+    entities = [Masters::class, Visitor::class],
+    version = 2
 )
 abstract class SocietyDatabase: RoomDatabase() {
-    abstract fun dao(): MastersDao
+    abstract fun dao(): SocietyDao
 
     companion object {
         @Volatile

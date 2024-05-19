@@ -9,8 +9,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.societyapp.SocietyApplication
 import com.example.societyapp.ui.data.Masters
-import com.example.societyapp.ui.data.MastersDao
 import com.example.societyapp.ui.data.MastersUiState
+import com.example.societyapp.ui.data.SocietyDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MastersViewModel(
-    private val mastersDao: MastersDao
+    private val societyDao: SocietyDao
 ): ViewModel() {
     private val _uiState = MutableStateFlow(MastersUiState())
     val uiState: StateFlow<MastersUiState> = _uiState.asStateFlow()
@@ -79,7 +79,7 @@ class MastersViewModel(
                 mobileNoTwo = mobileNoTwo.toLong()
             )
             try {
-                mastersDao.insertMasters(masters = masters)
+                societyDao.insertMasters(masters = masters)
             }
             catch (e:Exception){
                 Log.d("Exception", e.toString())

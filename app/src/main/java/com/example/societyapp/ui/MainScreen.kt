@@ -36,17 +36,22 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.societyapp.R
+import com.example.societyapp.ui.data.Visitor
 import com.example.societyapp.ui.models.SocietyViewModel
 import com.example.societyapp.ui.theme.SocietyAppTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +87,13 @@ fun MainScreen(
     activity: ComponentActivity,
 ) {
     val societyUiState by societyViewModel.uiState.collectAsState()
-    val fetchedUiState by societyViewModel.fetchedUiState.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    remember {
+        lifecycleOwner.lifecycleScope.launch {
+            societyViewModel.getMastersData()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -220,7 +231,7 @@ fun MainScreen(
                     TextField(
                         value = societyUiState.selected,
                         onValueChange = {
-                            societyViewModel.updateSelectedFlat(it)
+                            societyViewModel.updateSelectedFlat(it, societyUiState.selectedId)
                         },
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = societyUiState.expanded) },
@@ -237,12 +248,14 @@ fun MainScreen(
                             .heightIn(2.dp, 150.dp)
                             .fillMaxWidth()
                     ) {
-                        fetchedUiState.mastersList.forEach {
+                        societyUiState.mastersList.forEach {
                             DropdownMenuItem(
                                 modifier = modifier.fillMaxWidth(),
                                 leadingIcon = { Text(text = it.flatNumber.toString()) },
                                 text = { Text(text = it.name, modifier = modifier) },
-                                onClick = {},
+                                onClick = {
+                                          societyViewModel.updateSelectedFlat(selected = it.name, id= it.id )
+                                },
                                 trailingIcon = {
                                     Row {
                                         IconButton(
@@ -279,10 +292,24 @@ fun MainScreen(
             }
 
             Spacer(modifier = modifier.padding(80.dp))
-            Button(onClick = { /*TODO*/ },  modifier = modifier.fillMaxWidth()) {
+            Button(
+                onClick = {
+                    societyViewModel.save(
+                        Visitor(
+                            name = societyUiState.name,
+                            mobileNo = societyUiState.mobileNo,
+                            from = societyUiState.from,
+                            date = societyUiState.date,
+                            category = if (societyUiState.workerChoose) "Worker" else "Visitor",
+                            mastersCode = societyUiState.selectedId
+                        )
+                    )
+                    societyViewModel.clear()
+                },  modifier = modifier.fillMaxWidth(),
+
+            ) {
                 Text(text = stringResource(id = R.string.save))
             }
-
         }
     }
 }

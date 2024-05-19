@@ -9,6 +9,7 @@ data class SocietyUiState(
     val workerChoose: Boolean = false,
     val expanded: Boolean = false,
     val selected: String = "Select Flat",
+    val selectedId: Int? = null,
     val isFlatSelected: Boolean = false,
     val mastersList: List<Masters> = listOf(),
     val mobileNoButtonOne: String = "",
