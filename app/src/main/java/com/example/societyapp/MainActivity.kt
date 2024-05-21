@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.societyapp.ui.MainScreen
 import com.example.societyapp.ui.MastersScreen
+import com.example.societyapp.ui.WorkerScreen
 import com.example.societyapp.ui.models.MastersViewModel
 import com.example.societyapp.ui.models.SocietyViewModel
 import com.example.societyapp.ui.theme.SocietyAppTheme
@@ -30,6 +31,14 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.RequestPermission()
         ) {}
         requestPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
+        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+
+        //val context = LocalContext.current
+        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+        requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+
+
         setContent {
             SocietyAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -51,7 +60,8 @@ class MainActivity : ComponentActivity() {
 
 enum class MyAppScreen{
     Masters,
-    Main
+    Main,
+    Worker
 }
 
 @Composable
@@ -68,6 +78,7 @@ fun SocietyApp(
                 societyViewModel = societyViewModel,
                 add = { navController.navigate(MyAppScreen.Masters.name) },
                 activity = activity,
+                navigateToWorkerScreen = { navController.navigate(MyAppScreen.Worker.name)}
             )
         }
 
@@ -75,6 +86,13 @@ fun SocietyApp(
             MastersScreen(
                 mastersViewModel = mastersViewModel,
                 onBackPress = { navController.popBackStack() }
+            )
+        }
+
+        composable(MyAppScreen.Worker.name) {
+            WorkerScreen(
+                workerViewModel = viewModel(),
+                navigateBack = { navController.popBackStack() }
             )
         }
 

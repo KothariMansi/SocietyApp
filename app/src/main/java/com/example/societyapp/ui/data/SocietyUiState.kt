@@ -1,5 +1,7 @@
 package com.example.societyapp.ui.data
 
+import androidx.lifecycle.MutableLiveData
+
 data class SocietyUiState(
     val name: String = "",
     val mobileNo: String = "",
@@ -13,7 +15,8 @@ data class SocietyUiState(
     val isFlatSelected: Boolean = false,
     val mastersList: List<Masters> = listOf(),
     val mobileNoButtonOne: String = "",
-    val mobileNoButtonTwo: String = ""
+    val mobileNoButtonTwo: String = "",
+    val recognizedText: MutableLiveData<String> = MutableLiveData<String>()
 
 
 )

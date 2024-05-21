@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
@@ -40,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -85,6 +85,7 @@ fun MainScreen(
     societyViewModel: SocietyViewModel,
     add: () -> Unit,
     activity: ComponentActivity,
+    navigateToWorkerScreen: () -> Unit
 ) {
     val societyUiState by societyViewModel.uiState.collectAsState()
 
@@ -137,7 +138,10 @@ fun MainScreen(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     trailingIcon = {
                         IconButton(onClick = { societyViewModel.getSpeechInput(activity = activity) }) {
-                            Icon(imageVector = Icons.Filled.Face, contentDescription = "")
+                            Icon(
+                                painter = painterResource(R.drawable.mic_filled),
+                                contentDescription = ""
+                            )
                         }
                     }
                 )
@@ -207,7 +211,10 @@ fun MainScreen(
                 Row(
                     modifier = modifier.selectable(
                         selected = societyUiState.workerChoose,
-                        onClick = { societyViewModel.workerUpdate(worker = societyUiState.workerChoose) }
+                        onClick = {
+                            societyViewModel.workerUpdate(worker = societyUiState.workerChoose)
+                            navigateToWorkerScreen()
+                        }
                     )
                 ) {
                     RadioButton(selected = societyUiState.workerChoose,
@@ -324,6 +331,7 @@ fun MainScreenPreview() {
             societyViewModel = viewModel(),
             add = {},
             activity = ComponentActivity(),
+            navigateToWorkerScreen = {}
         )
     }
 }

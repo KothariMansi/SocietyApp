@@ -2,10 +2,13 @@ package com.example.societyapp.ui.models
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -30,6 +33,7 @@ import java.util.Locale
 
 class SocietyViewModel(
     private val societyDao: SocietyDao,
+    application: SocietyApplication
 ): ViewModel() {
     private val _uiState = MutableStateFlow(SocietyUiState())
     val uiState: StateFlow<SocietyUiState> = _uiState.asStateFlow()
@@ -82,11 +86,44 @@ class SocietyViewModel(
         }
     }
 
+    private val speechRecognizer: SpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(application).apply {
+        setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {}
+            override fun onBeginningOfSpeech() {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() {}
+            override fun onError(error: Int) {
+                Log.e("SpeechRecognizer", "Error: $error")
+            }
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                if (!matches.isNullOrEmpty()) {
+                    updateName("")
+                    updateName(matches[0])
+                }
+            }
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
+    }
+
     fun getSpeechInput(activity: ComponentActivity) {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak Something")
-        startActivityForResult(activity, intent, 101, null)
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+            )
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        }
+
+        ActivityCompat.startActivityForResult(activity, intent, 101, null)
+        speechRecognizer.startListening(intent)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        speechRecognizer.destroy()
     }
 
     fun updateFrom(from: String) {
@@ -119,7 +156,6 @@ class SocietyViewModel(
             it.copy(
                 visitorChoose = !visitor,
                 workerChoose = false
-
             )
         }
     }
@@ -129,7 +165,6 @@ class SocietyViewModel(
             it.copy(
                 visitorChoose = false,
                 workerChoose = !worker
-
             )
         }
     }
@@ -162,27 +197,24 @@ class SocietyViewModel(
         makeCall(activity, phoneNumber)
     }
 
-
     private fun makeCall(activity: ComponentActivity, phoneNumber: String) {
         val intent = Intent(
             Intent.ACTION_CALL,
             Uri.parse("tel:$phoneNumber")
         ) // Initiates the Intent
-
         activity.startActivity(intent)
-
     }
+
     companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
+        //private const val TIMEOUT_MILLIS = 5_000L
         //private const val CALL_PERMISSION_REQUEST_CODE = 123
 
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as SocietyApplication)
-                SocietyViewModel(application.database.dao())
+                SocietyViewModel(application.database.dao(), application)
             }
         }
-
     }
 
 }
