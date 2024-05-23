@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.societyapp.R
-import com.example.societyapp.ui.data.Visitor
 import com.example.societyapp.ui.models.SocietyViewModel
 import com.example.societyapp.ui.theme.SocietyAppTheme
 import kotlinx.coroutines.launch
@@ -85,7 +84,8 @@ fun MainScreen(
     societyViewModel: SocietyViewModel,
     add: () -> Unit,
     activity: ComponentActivity,
-    navigateToWorkerScreen: () -> Unit
+    navigateToWorkerScreen: () -> Unit,
+    navigateToSummaryScreen: () -> Unit
 ) {
     val societyUiState by societyViewModel.uiState.collectAsState()
 
@@ -145,8 +145,8 @@ fun MainScreen(
                         }
                     }
                 )
-                /* Todo Icon Mic */
             }
+
             Row {
                 Text(
                     text = stringResource(R.string.mobile_no),
@@ -159,6 +159,7 @@ fun MainScreen(
                     onValueChange = {societyViewModel.updateMobileNo(it)},
                     Modifier.weight(3f),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Number),
+                    isError = societyUiState.mobileNo.length > 10
                 )
             }
             Row {
@@ -218,7 +219,11 @@ fun MainScreen(
                     )
                 ) {
                     RadioButton(selected = societyUiState.workerChoose,
-                        onClick = { societyViewModel.workerUpdate(worker = societyUiState.workerChoose) })
+                        onClick = {
+                            societyViewModel.workerUpdate(worker = societyUiState.workerChoose)
+                            navigateToWorkerScreen()
+                        }
+                    )
                     Text(text = "Worker", modifier = modifier
                         .padding(top = 12.dp, end = 4.dp)
                     )
@@ -297,25 +302,18 @@ fun MainScreen(
                     }
                 }
             }
-
             Spacer(modifier = modifier.padding(80.dp))
             Button(
                 onClick = {
-                    societyViewModel.save(
-                        Visitor(
-                            name = societyUiState.name,
-                            mobileNo = societyUiState.mobileNo,
-                            from = societyUiState.from,
-                            date = societyUiState.date,
-                            category = if (societyUiState.workerChoose) "Worker" else "Visitor",
-                            mastersCode = societyUiState.selectedId
-                        )
-                    )
-                    societyViewModel.clear()
+                    societyViewModel.save()
                 },  modifier = modifier.fillMaxWidth(),
-
+                enabled = societyViewModel.checkConditions()
             ) {
                 Text(text = stringResource(id = R.string.save))
+            }
+
+            Button(onClick = navigateToSummaryScreen) {
+                Text(text = stringResource(R.string.summary))
             }
         }
     }
@@ -328,10 +326,11 @@ fun MainScreen(
 fun MainScreenPreview() {
     SocietyAppTheme {
         MainScreen(
-            societyViewModel = viewModel(),
+            societyViewModel = viewModel(factory = SocietyViewModel.factory),
             add = {},
             activity = ComponentActivity(),
-            navigateToWorkerScreen = {}
+            navigateToWorkerScreen = {},
+            navigateToSummaryScreen = {}
         )
     }
 }

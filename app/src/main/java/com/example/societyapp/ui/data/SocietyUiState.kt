@@ -1,6 +1,6 @@
 package com.example.societyapp.ui.data
 
-import androidx.lifecycle.MutableLiveData
+import android.graphics.Bitmap
 
 data class SocietyUiState(
     val name: String = "",
@@ -12,11 +12,12 @@ data class SocietyUiState(
     val expanded: Boolean = false,
     val selected: String = "Select Flat",
     val selectedId: Int? = null,
-    val isFlatSelected: Boolean = false,
     val mastersList: List<Masters> = listOf(),
     val mobileNoButtonOne: String = "",
     val mobileNoButtonTwo: String = "",
-    val recognizedText: MutableLiveData<String> = MutableLiveData<String>()
+    val adharNo: String = "",
+    val imageBitmap: Bitmap? = null,
+    val enabled: Boolean = false
 
 
 )

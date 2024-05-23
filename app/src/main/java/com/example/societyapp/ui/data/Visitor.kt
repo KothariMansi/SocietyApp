@@ -14,5 +14,8 @@ data class Visitor(
     val from: String,
     val date: String,
     val category: String,
-    val mastersCode: Int?
+    val mastersCode: Int?,
+    @ColumnInfo("adhar_no")
+    val adharNo: String?,
+    val imageData: ByteArray?
 )

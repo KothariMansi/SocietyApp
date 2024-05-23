@@ -1,6 +1,7 @@
 package com.example.societyapp.ui.models
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognitionListener
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,21 +37,79 @@ class SocietyViewModel(
     private val societyDao: SocietyDao,
     application: SocietyApplication
 ): ViewModel() {
-    private val _uiState = MutableStateFlow(SocietyUiState())
+    private var _uiState = MutableStateFlow(SocietyUiState())
     val uiState: StateFlow<SocietyUiState> = _uiState.asStateFlow()
 
-    fun save(visitor: Visitor) {
+    fun updateAdharNo(adharNo: String) {
+        val digitsOnly = adharNo.filter { it.isDigit() }
+        _uiState.update {
+            it.copy(
+                adharNo = digitsOnly.chunked(4).joinToString(" ").trim()
+            )
+        }
+    }
+
+    fun setImageBitmap(bitmap: Bitmap) {
         viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    imageBitmap = bitmap
+                )
+            }
+        }
+    }
+
+     fun checkConditions(): Boolean {
+         return _uiState.value.name.isNotBlank() &&
+        _uiState.value.mobileNo.isNotBlank() &&
+        _uiState.value.mobileNo.length == 10 &&
+        _uiState.value.from.isNotBlank() &&
+        _uiState.value.date.isNotBlank() &&
+        _uiState.value.selected != "Select Flat" &&
+        _uiState.value.workerChoose ||
+        _uiState.value.visitorChoose
+    }
+
+    fun clearWorkerDetail() {
+        _uiState.update {
+            it.copy(
+                workerChoose = false,
+                adharNo = "",
+                imageBitmap = null
+            )
+        }
+    }
+
+    fun save() {
+        viewModelScope.launch {
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            uiState.value.imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val imageData = byteArrayOutputStream.toByteArray()
+
+
+            val visitor = Visitor(
+                id = null,
+                name = _uiState.value.name,
+                mobileNo = _uiState.value.mobileNo,
+                from = _uiState.value.from,
+                date = _uiState.value.date,
+                category = if (_uiState.value.visitorChoose) "Visitor" else "Worker",
+                mastersCode = _uiState.value.selectedId,
+                adharNo = if (_uiState.value.workerChoose) _uiState.value.adharNo else null,
+                imageData = imageData
+            )
+
             try {
                 societyDao.insertVisitors(visitor = visitor)
             }
             catch (e:Exception){
                 Log.d("Exception", e.toString())
             }
+            clear()
         }
     }
 
-    fun clear() {
+    private fun clear() {
         _uiState.update {
             it.copy(
                 name = "",
@@ -58,7 +118,9 @@ class SocietyViewModel(
                 date = "",
                 selected = "Select Flat",
                 visitorChoose = false,
-                workerChoose = false
+                workerChoose = false,
+                adharNo = "",
+                imageBitmap = null
             )
         }
     }
@@ -155,7 +217,7 @@ class SocietyViewModel(
         _uiState.update {
             it.copy(
                 visitorChoose = !visitor,
-                workerChoose = false
+                workerChoose = false,
             )
         }
     }
@@ -164,7 +226,7 @@ class SocietyViewModel(
         _uiState.update {
             it.copy(
                 visitorChoose = false,
-                workerChoose = !worker
+                workerChoose = !worker,
             )
         }
     }

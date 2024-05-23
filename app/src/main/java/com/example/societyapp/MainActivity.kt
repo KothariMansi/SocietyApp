@@ -17,9 +17,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.societyapp.ui.MainScreen
 import com.example.societyapp.ui.MastersScreen
+import com.example.societyapp.ui.SummaryScreen
 import com.example.societyapp.ui.WorkerScreen
 import com.example.societyapp.ui.models.MastersViewModel
 import com.example.societyapp.ui.models.SocietyViewModel
+import com.example.societyapp.ui.models.SummaryViewModel
 import com.example.societyapp.ui.theme.SocietyAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,6 +52,7 @@ class MainActivity : ComponentActivity() {
                    SocietyApp(
                        mastersViewModel = viewModel(factory = MastersViewModel.factory),
                        societyViewModel = viewModel(factory = SocietyViewModel.factory),
+                       summaryViewModel = viewModel(factory = SummaryViewModel.factory),
                        activity = this,
                    )
                 }
@@ -61,14 +64,16 @@ class MainActivity : ComponentActivity() {
 enum class MyAppScreen{
     Masters,
     Main,
-    Worker
+    Worker,
+    Summary
 }
 
 @Composable
 fun SocietyApp(
     navController: NavHostController = rememberNavController(),
-    societyViewModel: SocietyViewModel = viewModel(),
+    societyViewModel: SocietyViewModel,
     mastersViewModel: MastersViewModel,
+    summaryViewModel: SummaryViewModel,
     activity: ComponentActivity,
 
 ) {
@@ -78,7 +83,8 @@ fun SocietyApp(
                 societyViewModel = societyViewModel,
                 add = { navController.navigate(MyAppScreen.Masters.name) },
                 activity = activity,
-                navigateToWorkerScreen = { navController.navigate(MyAppScreen.Worker.name)}
+                navigateToWorkerScreen = { navController.navigate(MyAppScreen.Worker.name)},
+                navigateToSummaryScreen = {navController.navigate(MyAppScreen.Summary.name)}
             )
         }
 
@@ -91,8 +97,14 @@ fun SocietyApp(
 
         composable(MyAppScreen.Worker.name) {
             WorkerScreen(
-                workerViewModel = viewModel(),
+                societyViewModel = societyViewModel,
                 navigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(MyAppScreen.Summary.name) {
+            SummaryScreen(
+                summaryViewModel = summaryViewModel,
+                onBackPress = { navController.popBackStack()}
             )
         }
 
