@@ -7,7 +7,8 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [Masters::class, Visitor::class],
-    version = 5
+    version = 5,
+    exportSchema = false
 )
 abstract class SocietyDatabase: RoomDatabase() {
     abstract fun dao(): SocietyDao

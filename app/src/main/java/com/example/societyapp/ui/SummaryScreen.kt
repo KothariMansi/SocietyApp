@@ -75,7 +75,9 @@ fun SummaryItem(
             .fillMaxWidth()
     ) {
         Row(
-            modifier = modifier.fillMaxWidth().heightIn(150.dp, 200.dp)
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(130.dp, 250.dp)
         ) {
             if (bitmap != null) {
                 Image(bitmap = bitmap.asImageBitmap(),
@@ -85,7 +87,9 @@ fun SummaryItem(
                 )
             }
             Column(
-                modifier = modifier.padding(8.dp).heightIn(130.dp, 200.dp)
+                modifier = modifier
+                    .padding(8.dp)
+                    .heightIn(130.dp, 250.dp)
             ) {
                 Row(modifier = modifier.fillMaxWidth()) {
                     Text(text = "Name:", modifier = modifier.weight(1f))
@@ -93,7 +97,7 @@ fun SummaryItem(
                     Text(text = summary.name, modifier = modifier.weight(2f))
                 }
                 Row(modifier = modifier.fillMaxWidth()) {
-                    Text(text = "Category:", modifier = modifier.weight(1f))
+                    Text(text = stringResource(R.string.category) + ":", modifier = modifier.weight(1f))
                     Spacer(modifier = modifier.padding())
                     Text(text = summary.category, modifier = modifier.weight(2f))
                 }

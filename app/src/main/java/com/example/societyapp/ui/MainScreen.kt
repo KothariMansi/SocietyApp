@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
@@ -156,11 +157,18 @@ fun MainScreen(
                 )
                 Spacer(modifier = modifier.padding(16.dp))
                 TextField(value = societyUiState.mobileNo,
-                    onValueChange = {societyViewModel.updateMobileNo(it)},
+                    onValueChange = {num ->
+                        societyViewModel.updateMobileNo(num)
+                                    },
                     Modifier.weight(3f),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next, keyboardType = KeyboardType.Number),
                     isError = societyUiState.mobileNo.length > 10
                 )
+                if (societyUiState.isMobileLengthExceed){
+                    AlertDialog(onDismissRequest = { societyViewModel.onDismissMobileAlert() }) {
+                        Text(text = "Mobile No. should have 10 characters only.")
+                    }
+                }
             }
             Row {
                 Text(

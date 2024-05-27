@@ -17,7 +17,10 @@ data class SocietyUiState(
     val mobileNoButtonTwo: String = "",
     val adharNo: String = "",
     val imageBitmap: Bitmap? = null,
-    val enabled: Boolean = false
-
+    val isError: Boolean = false,
+    val isMobileLengthExceed: Boolean = false,
+    val workerCategory: String = "",
+    val isAddNew: Boolean = false,
+    val newCategory: String = ""
 
 )

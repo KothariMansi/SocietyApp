@@ -16,8 +16,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,18 +37,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.societyapp.R
+import com.example.societyapp.ui.data.workerCategoryList
 import com.example.societyapp.ui.models.SocietyViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkerScreen(
     societyViewModel: SocietyViewModel,
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val workerCategory by societyViewModel.fetchWorkerCategory().collectAsState(
+        initial = workerCategoryList
+    )
+    workerCategoryList = workerCategory.toMutableList()
+
     val societyUiState by societyViewModel.uiState.collectAsState()
     // Image capture
     val captureImageLauncher = rememberLauncherForActivityResult(
@@ -73,10 +89,10 @@ fun WorkerScreen(
         ) {
             Row(
                 modifier = modifier
-                    .padding(horizontal = 4.dp)
+                    .padding(4.dp)
                     .fillMaxWidth()
             ) {
-                Text(text = "Adhar No.", modifier = modifier.padding(vertical = 16.dp))
+                Text(text = stringResource(R.string.adhar_no), modifier = modifier.padding(vertical = 16.dp))
                 Spacer(modifier = modifier.padding(4.dp))
                 TextField(
                     value = TextFieldValue(
@@ -88,6 +104,42 @@ fun WorkerScreen(
                     isError = societyUiState.adharNo.length > 14
                 )
             }
+
+            Row(
+                modifier = modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(text = stringResource(R.string.category), modifier = modifier.padding(vertical = 16.dp))
+                Spacer(modifier = modifier.padding(8.dp))
+                Column(
+                    modifier = modifier.verticalScroll(rememberScrollState())
+                ) {
+                    ExposedDropdownMenuBox(expanded = societyUiState.expanded,
+                        onExpandedChange = { societyViewModel.expandDropdown() }
+                    ) {
+                        TextField(
+                            value = societyUiState.workerCategory, onValueChange = { societyViewModel.updateWorkerCategory(it) },
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = societyUiState.expanded) },
+                            modifier = Modifier.menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = societyUiState.expanded,
+                            onDismissRequest = { societyViewModel.onDismissRequest() },
+                            modifier = modifier.exposedDropdownSize()
+                        ) {
+                            workerCategory.forEach { worker ->
+                                DropdownMenuItem(
+                                    text = { Text(text = worker) },
+                                    onClick = { societyViewModel.updateWorkerCategory(worker) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             OutlinedButton(
                 onClick = {
                     val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -110,11 +162,38 @@ fun WorkerScreen(
             }
 
             Button(onClick = {
-                navigateBack()
+                if(societyUiState.adharNo.length == 14) {
+                    navigateBack()
+                } else {
+                    societyViewModel.onWrongAdhar()
+                }
             }) {
-                Text(text = "OK")
+                Text(text = stringResource(R.string.ok))
             }
 
+            if (societyUiState.isError) {
+                AlertDialog(
+                    onDismissRequest = {societyViewModel.onWrongAdhar() },
+                ) {
+                    Text(text = "Adhar no should have 12 characters.")
+                }
+            }
+            Row {
+                Button(onClick = { societyViewModel.updateIsAddNew() }) {
+                    Text(text = "Click for New")
+                }
+                if (societyUiState.isAddNew) {
+                    Column {
+                        TextField(value = societyUiState.newCategory, onValueChange = {societyViewModel.updateNewCategory(it)})
+                        Button(onClick = {
+                            societyViewModel.saveNewWorkerCategory(workerCategoryList)
+                            societyViewModel.updateIsAddNew()
+                        }) {
+                            Text(text = "Save")
+                        }
+                    }
+                }
+            }
         }
     }
 }

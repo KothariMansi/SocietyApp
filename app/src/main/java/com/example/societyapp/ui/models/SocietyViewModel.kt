@@ -20,7 +20,10 @@ import com.example.societyapp.SocietyApplication
 import com.example.societyapp.ui.data.SocietyDao
 import com.example.societyapp.ui.data.SocietyUiState
 import com.example.societyapp.ui.data.Visitor
+import com.example.societyapp.ui.data.getWorkerCategory
+import com.example.societyapp.ui.data.saveWorkerCategoryList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,6 +50,10 @@ class SocietyViewModel(
                 adharNo = digitsOnly.chunked(4).joinToString(" ").trim()
             )
         }
+    }
+
+    fun updateWorkerCategory(workerCategory: String) {
+        _uiState.update { it.copy(workerCategory = workerCategory) }
     }
 
     fun setImageBitmap(bitmap: Bitmap) {
@@ -86,7 +93,6 @@ class SocietyViewModel(
             uiState.value.imageBitmap?.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
             val imageData = byteArrayOutputStream.toByteArray()
 
-
             val visitor = Visitor(
                 id = null,
                 name = _uiState.value.name,
@@ -98,7 +104,6 @@ class SocietyViewModel(
                 adharNo = if (_uiState.value.workerChoose) _uiState.value.adharNo else null,
                 imageData = imageData
             )
-
             try {
                 societyDao.insertVisitors(visitor = visitor)
             }
@@ -161,7 +166,7 @@ class SocietyViewModel(
             override fun onResults(results: Bundle?) {
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 if (!matches.isNullOrEmpty()) {
-                    updateName("")
+                    //updateName("")
                     updateName(matches[0])
                 }
             }
@@ -183,6 +188,11 @@ class SocietyViewModel(
         speechRecognizer.startListening(intent)
     }
 
+    fun onWrongAdhar() {
+        _uiState.update { it.copy(
+            isError = !_uiState.value.isError
+        ) }
+    }
     override fun onCleared() {
         super.onCleared()
         speechRecognizer.destroy()
@@ -199,11 +209,21 @@ class SocietyViewModel(
     fun updateMobileNo(currentNum: String) {
         _uiState.update {
             it.copy(
-                mobileNo = currentNum
+                mobileNo = currentNum,
+                isMobileLengthExceed = _uiState.value.mobileNo.length > 10
             )
         }
     }
 
+    fun onDismissMobileAlert() {
+        _uiState.update {
+            it.copy(isMobileLengthExceed = false)
+        }
+    }
+
+    init {
+        getCurrentDate()
+    }
     fun getCurrentDate() {
         val sdf = SimpleDateFormat("dd:MM:yyyy", Locale.getDefault())
         _uiState.update {
@@ -267,10 +287,28 @@ class SocietyViewModel(
         activity.startActivity(intent)
     }
 
-    companion object {
-        //private const val TIMEOUT_MILLIS = 5_000L
-        //private const val CALL_PERMISSION_REQUEST_CODE = 123
+    fun updateIsAddNew() {
+        _uiState.update { it.copy(isAddNew = !_uiState.value.isAddNew) }
+    }
 
+    private val context = application
+    fun updateNewCategory(newCategory: String) {
+        _uiState.update { it.copy(newCategory = newCategory) }
+    }
+
+    fun saveNewWorkerCategory(workerCategoryList: MutableList<String>) {
+        workerCategoryList.add(_uiState.value.newCategory)
+        viewModelScope.launch {
+            saveWorkerCategoryList(context = context, workerCategoryList)
+        }
+        _uiState.update { it.copy(newCategory = "") }
+    }
+
+    fun fetchWorkerCategory(): Flow<List<String>> {
+        return getWorkerCategory(context = context)
+    }
+
+    companion object {
         val factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as SocietyApplication)

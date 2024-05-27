@@ -10,4 +10,7 @@
     <string name="societyApp">Society App</string>
     <string name="masters">Masters</string>
     <string name="summary">Summary</string>
+    <string name="adhar_no">Adhar No.</string>
+    <string name="ok">OK</string>
+    <string name="category">Category</string>
 </resources>
